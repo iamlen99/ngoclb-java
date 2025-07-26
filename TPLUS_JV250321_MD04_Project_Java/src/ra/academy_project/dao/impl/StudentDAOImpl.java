@@ -14,7 +14,7 @@ import java.util.Optional;
 public class StudentDAOImpl implements StudentDAO {
 
     @Override
-    public Optional<Student> login(String email, String password) {
+    public Optional<Student> getAccount(String email, String password) {
         Optional<Student> result = Optional.empty();
         Connection conn = null;
         PreparedStatement preStmt = null;

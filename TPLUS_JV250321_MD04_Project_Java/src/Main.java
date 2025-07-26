@@ -22,11 +22,11 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    adminPresentation.login(scanner);
+                    adminPresentation.loginAsAdmin(scanner);
                     break;
 
                 case 2:
-                    studentPresentation.login(scanner);
+                    studentPresentation.loginAsStudent(scanner);
                     break;
 
                 case 3:

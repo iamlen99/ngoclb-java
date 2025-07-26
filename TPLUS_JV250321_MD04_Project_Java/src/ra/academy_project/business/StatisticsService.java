@@ -10,4 +10,10 @@ public interface StatisticsService {
     Optional<CourseAndStudentStatistics> statisticsCount ();
 
     List<StudentsByCourse> findAllStudentsByCourse();
+
+    List<StudentsByCourse> getTop5CourseByStudentCount();
+
+    List<StudentsByCourse> getCourseMoreThan10Students();
+
+    void displayStatistics(List<StudentsByCourse> statisticsList);
 }

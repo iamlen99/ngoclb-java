@@ -5,5 +5,5 @@ import ra.academy_project.model.Admin;
 import java.util.Optional;
 
 public interface AdminService {
-     Optional<Admin> login(String username, String password);
+     Optional<Admin> getAdminAccount(String username, String password);
 }

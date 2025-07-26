@@ -6,6 +6,7 @@ import ra.academy_project.model.Student;
 import ra.academy_project.validation.Validator;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
@@ -313,18 +314,41 @@ public class StudentManagementPresentation {
         } while (!isExit);
     }
 
-    public void sortStudentsByNameASC () {
+    public void sortStudentsByNameASC() {
         List<Student> listStudent = studentService.findAllStudents();
         if (listStudent.isEmpty()) {
             System.out.println("Danh sach trong");
         } else {
-            listStudent.stream()
-                    .sorted(Comparator.comparing(Student::getName))
-                    .forEach(System.out::println);
+            List<Student> listStudentSort = new ArrayList<>(listStudent);
+            for (Student student : listStudentSort) {
+                String[] studentName = student.getName().split(" ");
+                for (int i = 0; i < studentName.length / 2; i++) {
+                    String temp = studentName[i];
+                    studentName[i] = studentName[studentName.length - i - 1];
+                    studentName[studentName.length - i - 1] = temp;
+                }
+                student.setName(String.join(" ", studentName));
+            }
+
+            listStudentSort = listStudentSort.stream()
+                    .sorted(Comparator.comparing(Student::getName
+                    )).toList();
+
+            for (Student student : listStudentSort) {
+                String[] studentName = student.getName().split(" ");
+                for (int i = 0; i < studentName.length / 2; i++) {
+                    String temp = studentName[i];
+                    studentName[i] = studentName[studentName.length - i - 1];
+                    studentName[studentName.length - i - 1] = temp;
+                }
+                student.setName(String.join(" ", studentName));
+            }
+
+            listStudentSort.forEach(System.out::println);
         }
     }
 
-    public void sortStudentsByNameDESC () {
+    public void sortStudentsByNameDESC() {
         List<Student> listStudent = studentService.findAllStudents();
         if (listStudent.isEmpty()) {
             System.out.println("Danh sach trong");
@@ -335,7 +359,7 @@ public class StudentManagementPresentation {
         }
     }
 
-    public void sortStudentsByIdASC () {
+    public void sortStudentsByIdASC() {
         List<Student> listStudent = studentService.findAllStudents();
         if (listStudent.isEmpty()) {
             System.out.println("Danh sach trong");
@@ -346,7 +370,7 @@ public class StudentManagementPresentation {
         }
     }
 
-    public void sortStudentsByIdDESC () {
+    public void sortStudentsByIdDESC() {
         List<Student> listStudent = studentService.findAllStudents();
         if (listStudent.isEmpty()) {
             System.out.println("Danh sach trong");

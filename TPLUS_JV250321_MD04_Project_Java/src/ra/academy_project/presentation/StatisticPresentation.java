@@ -40,9 +40,11 @@ public class StatisticPresentation {
                     break;
 
                 case 3:
+                    displayTop5CourseByStudentCount();
                     break;
 
                 case 4:
+                    displayCourseMoreThan10Students();
                     break;
 
                 case 5:
@@ -65,11 +67,16 @@ public class StatisticPresentation {
 
     public void displayStudentsByCourse() {
         List<StudentsByCourse> listStudent = statisticsService.findAllStudentsByCourse();
-        if (listStudent.isEmpty()) {
-            System.out.println("Danh sach trong");
-        } else {
-            System.out.printf("| %-22s | %-17s |\n", "Ten khoa hoc", "So luong hoc vien");
-            listStudent.forEach(System.out::println);
-        }
+        statisticsService.displayStatistics(listStudent);
+    }
+
+    public void displayTop5CourseByStudentCount() {
+        List<StudentsByCourse> listStudent = statisticsService.getTop5CourseByStudentCount();
+        statisticsService.displayStatistics(listStudent);
+    }
+
+    public void displayCourseMoreThan10Students() {
+        List<StudentsByCourse> listStudent = statisticsService.getCourseMoreThan10Students();
+        statisticsService.displayStatistics(listStudent);
     }
 }

@@ -16,7 +16,7 @@ public class Validator {
             if (!isEmpty(input)) {
                 return input;
             }
-            System.err.print("Ban chua nhap gi ca, hay nhap " + message.toLowerCase());
+            System.err.print("Ban chua nhap gi ca, hay " + message.toLowerCase());
         } while (true);
     }
 

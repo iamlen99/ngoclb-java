@@ -280,3 +280,27 @@ begin
 end $$
 DELIMITER ;
 
+DELIMITER $$
+create procedure get_top_5_course_by_student_count()
+begin
+    select c.name as course_name, count(e.student_id)
+                  as count_students
+    from enrollment e
+             inner join course c on e.course_id = c.id
+    group by e.course_id
+    order by count_students DESC
+    limit 5;
+end $$
+DELIMITER ;
+# drop procedure get_courses_have_more_than_10_student;
+DELIMITER $$
+create procedure get_courses_have_more_than_10_student()
+begin
+    select c.name as course_name, count(e.student_id)
+                  as count_students
+    from enrollment e
+             inner join course c on e.course_id = c.id
+    group by e.course_id
+    having count(e.student_id) >10;
+end $$
+DELIMITER ;

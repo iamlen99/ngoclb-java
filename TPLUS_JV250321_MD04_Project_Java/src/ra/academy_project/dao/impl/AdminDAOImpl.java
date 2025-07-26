@@ -12,7 +12,7 @@ import java.util.Optional;
 public class AdminDAOImpl implements AdminDAO {
 
     @Override
-    public Optional<Admin> login(String username, String password) {
+    public Optional<Admin> getAccount(String username, String password) {
         Optional<Admin> result = Optional.empty();
         Connection conn = null;
         PreparedStatement preStmt = null;

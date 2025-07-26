@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StudentService {
-    Optional<Student> login(String email, String password);
+    Optional<Student> getStudentAccount(String email, String password);
 
     List<Student> findAllStudents();
 

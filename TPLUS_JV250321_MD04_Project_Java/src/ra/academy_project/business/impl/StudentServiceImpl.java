@@ -15,8 +15,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Optional<Student> login(String email, String password) {
-        return studentDAO.login(email, password);
+    public Optional<Student> getStudentAccount(String email, String password) {
+        return studentDAO.getAccount(email, password);
     }
 
     @Override

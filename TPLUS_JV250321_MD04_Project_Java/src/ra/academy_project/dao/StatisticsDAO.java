@@ -10,4 +10,8 @@ public interface StatisticsDAO {
     Optional<CourseAndStudentStatistics> statisticsCount ();
 
     List<StudentsByCourse> findAll();
+
+    List<StudentsByCourse> getTop5Course ();
+
+    List<StudentsByCourse> getCourseMoreThan10Student ();
 }

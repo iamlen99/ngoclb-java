@@ -26,31 +26,29 @@ public class StudentPresentation {
         enrollmentService = new EnrollmentServiceImpl();
     }
 
-    public void login(Scanner scanner) {
+    public void loginAsStudent(Scanner scanner) {
         int attempt = 0;
         final int maxAttempts = 3;
         do {
             System.out.println("============================ DANG NHAP HOC VIEN ============================");
-            String email = Validator.inputNotEmptyData(scanner, "Email: ");
-            String password = Validator.inputNotEmptyData(scanner, "Mat khau: ");
+            String email = Validator.inputNotEmptyData(scanner, "Nhap email: ");
+            String password = Validator.inputNotEmptyData(scanner, "Nhap mat khau: ");
             System.out.println("============================================================================");
 
-            Optional<Student> student = studentService.login(email, password);
+            Optional<Student> student = studentService.getStudentAccount(email, password);
             if (student.isPresent()) {
                 System.out.println("Dang nhap thanh cong");
                 currentStudent = student.get();
                 displayStudentMenu(scanner);
                 break;
-            } else {
-                attempt++;
-                if (attempt >= maxAttempts) {
-                    System.err.println("Ban da nhap sai 3 lan. Thuc hien thoat dang nhap.");
-                    break;
-                } else {
-                    System.err.println("Sai ten dang nhap hoac mat khau!");
-                }
             }
 
+            attempt++;
+            if (attempt >= maxAttempts) {
+                System.err.println("Ban da nhap sai 3 lan. Thuc hien thoat dang nhap.");
+                break;
+            }
+            System.err.println("Sai ten dang nhap hoac mat khau!");
         } while (true);
     }
 

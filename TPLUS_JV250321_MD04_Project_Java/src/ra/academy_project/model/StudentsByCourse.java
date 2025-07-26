@@ -30,8 +30,8 @@ public class StudentsByCourse {
     @Override
     public String toString() {
         return String.format("| %s | %s |",
-                center(courseName, 22),
-                center(String.valueOf(countStudent), 17));
+                center(this.courseName, 22),
+                center(String.valueOf(this.countStudent), 17));
     }
 
     private String center(String text, int width) {

@@ -64,4 +64,53 @@ public class StatisticsDAOImpl implements StatisticsDAO {
         }
         return listStatistic;
     }
+    @Override
+    public List<StudentsByCourse> getTop5Course() {
+        Connection conn = null;
+        CallableStatement callStmt = null;
+        List<StudentsByCourse> listStatistic = null;
+        try {
+            conn = DBUtil.openConnection();
+            callStmt = conn.prepareCall("{call get_top_5_course_by_student_count()}");
+            ResultSet rs = callStmt.executeQuery();
+            listStatistic = new ArrayList<>();
+            while (rs.next()) {
+                StudentsByCourse studentsByCourse = new StudentsByCourse();
+                studentsByCourse.setCourseName(rs.getString(1));
+                studentsByCourse.setCountStudent(rs.getInt(2));
+                listStatistic.add(studentsByCourse);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closeCallableStatement(callStmt);
+            DBUtil.closeConnection(conn);
+        }
+        return listStatistic;
+    }
+
+    @Override
+    public List<StudentsByCourse> getCourseMoreThan10Student() {
+        Connection conn = null;
+        CallableStatement callStmt = null;
+        List<StudentsByCourse> listStatistic = null;
+        try {
+            conn = DBUtil.openConnection();
+            callStmt = conn.prepareCall("{call get_courses_have_more_than_10_student()}");
+            ResultSet rs = callStmt.executeQuery();
+            listStatistic = new ArrayList<>();
+            while (rs.next()) {
+                StudentsByCourse studentsByCourse = new StudentsByCourse();
+                studentsByCourse.setCourseName(rs.getString(1));
+                studentsByCourse.setCountStudent(rs.getInt(2));
+                listStatistic.add(studentsByCourse);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closeCallableStatement(callStmt);
+            DBUtil.closeConnection(conn);
+        }
+        return listStatistic;
+    }
 }

@@ -10,37 +10,38 @@ import java.util.Scanner;
 
 public class AdminPresentation {
     public final AdminService adminService;
+
     public AdminPresentation() {
         adminService = new AdminServiceImpl();
     }
 
-    public void login (Scanner scanner) {
+    public void loginAsAdmin(Scanner scanner) {
         int attempt = 0;
         final int maxAttempts = 3;
         do {
             System.out.println("============================ DANG NHAP QUAN TRI ============================");
-            String username = Validator.inputNotEmptyData(scanner, "Tai khoan: ");
-            String password = Validator.inputNotEmptyData(scanner, "Mat khau: ");
+            String username = Validator.inputNotEmptyData(scanner, "Nhap tai khoan: ");
+            String password = Validator.inputNotEmptyData(scanner, "Nhap mat khau: ");
             System.out.println("============================================================================");
 
-            Optional<Admin> admin = adminService.login(username, password);
+            Optional<Admin> admin = adminService.getAdminAccount(username, password);
             if (admin.isPresent()) {
                 System.out.println("Dang nhap thanh cong");
                 displayAdminMenu(scanner);
                 break;
-            } else {
-                attempt++;
-                if(attempt >= maxAttempts) {
-                    System.err.printf("Ban da nhap sai %d lan. Thuc hien thoat dang nhap\n",  maxAttempts);
-                    break;
-                } else {
-                    System.err.println("Sai ten dang nhap hoac mat khau!");
-                }
             }
+
+            attempt++;
+            if (attempt >= maxAttempts) {
+                System.err.printf("Ban da nhap sai %d lan. Thuc hien thoat dang nhap\n", maxAttempts);
+                break;
+            }
+            System.err.println("Sai ten dang nhap hoac mat khau!");
+
         } while (true);
     }
 
-    public void displayAdminMenu (Scanner scanner) {
+    public void displayAdminMenu(Scanner scanner) {
         boolean isExit = false;
         do {
             System.out.println("+=============================== MENU ADMIN ===============================+");
