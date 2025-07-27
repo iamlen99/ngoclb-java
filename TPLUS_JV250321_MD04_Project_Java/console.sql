@@ -49,7 +49,7 @@ INSERT INTO student (name, dob, email, sex, phone, password)
 VALUES ('Nguyen Van A', '2000-01-01', 'a.nguyen@example.com', 1, '0912345678', 'pass123'),
        ('Tran Thi B', '1999-05-20', 'b.tran@example.com', 0, '0987654321', 'abcxyz'),
        ('Le Van C', '2001-07-15', 'c.le@example.com', 1, '0909090909', 'qwerty'),
-    ('Pham Thi D', '1998-03-12', 'd.pham@example.com', 0, '0934567890', 'password1'),
+       ('Pham Thi D', '1998-03-12', 'd.pham@example.com', 0, '0934567890', 'password1'),
        ('Hoang Van E', '2002-09-25', 'e.hoang@example.com', 1, '0976543210', '12345678'),
        ('Nguyen Thi F', '2000-11-30', 'f.nguyen@example.com', 0, '0901122334', 'letmein'),
        ('Dang Van G', '1997-06-05', 'g.dang@example.com', 1, '0911223344', '123abc'),
@@ -68,17 +68,72 @@ VALUES ('Nguyen Van A', '2000-01-01', 'a.nguyen@example.com', 1, '0912345678', '
 INSERT INTO course (name, duration, instructor)
 VALUES ('Java Programming', 60, 'Mr. Dinh'),
        ('Web Development', 45, 'Ms. Hoa'),
-       ('Database Design', 30, 'Mr. Tuan');
+       ('Database Design', 30, 'Mr. Tuan'),
+       ('Python Basics', 40, 'Mr. Nam'),
+       ('Data Structures', 50, 'Ms. Linh'),
+       ('Machine Learning', 70, 'Mr. Phong'),
+       ('Cloud Computing', 35, 'Ms. Trang'),
+       ('Cyber Security', 55, 'Mr. Khoa'),
+       ('Mobile App Dev', 45, 'Ms. Huong'),
+       ('AI for Beginners', 60, 'Dr. An');
 
 INSERT INTO enrollment (student_id, course_id, status)
-VALUES (1, 1, 'CONFIRM'),
-       (1, 2, 'WAITING'),
+VALUES (1, 2, 'WAITING'),
        (2, 1, 'CANCEL'),
        (3, 3, 'CONFIRM');
 
+INSERT INTO enrollment (student_id, course_id, status)
+VALUES (1, 2, 'CONFIRM'),
+       (2, 2, 'WAITING'),
+       (3, 2, 'CONFIRM'),
+       (4, 2, 'CONFIRM'),
+       (5, 2, 'CONFIRM'),
+       (6, 2, 'WAITING'),
+       (7, 2, 'CONFIRM'),
+       (8, 2, 'WAITING'),
+       (9, 2, 'CONFIRM'),
+       (10, 2, 'CONFIRM'),
+
+       (11, 3, 'CONFIRM'),
+       (12, 3, 'WAITING'),
+       (13, 3, 'CONFIRM'),
+       (14, 3, 'CONFIRM'),
+       (15, 3, 'WAITING'),
+       (16, 3, 'CONFIRM'),
+       (17, 3, 'WAITING'),
+       (1, 3, 'CONFIRM'),
+       (2, 3, 'WAITING'),
+       (3, 3, 'CONFIRM'),
+
+       (4, 5, 'WAITING'),
+       (5, 5, 'CONFIRM'),
+       (6, 5, 'WAITING'),
+       (7, 5, 'CONFIRM'),
+       (8, 5, 'CONFIRM'),
+       (9, 5, 'WAITING'),
+       (10, 5, 'CONFIRM'),
+       (11, 5, 'CONFIRM'),
+       (12, 5, 'CONFIRM'),
+       (13, 5, 'WAITING'),
+
+       (14, 6, 'CONFIRM'),
+       (15, 6, 'CONFIRM'),
+       (16, 6, 'WAITING'),
+       (17, 6, 'CONFIRM'),
+       (1, 6, 'WAITING'),
+       (2, 6, 'CONFIRM'),
+       (3, 6, 'CONFIRM'),
+       (4, 6, 'WAITING'),
+       (5, 6, 'CONFIRM'),
+       (6, 6, 'CONFIRM'),
+       (5, 3, 'CONFIRM'),
+       (6, 3, 'WAITING'),
+       (7, 3, 'WAITING'),
+       (8, 3, 'CONFIRM'),
+       (9, 3, 'CONFIRM');
+
 
 # Tao procedure bang Course
-# drop procedure get_course_total_pages;
 
 DELIMITER $$
 create procedure get_course_total_pages(
@@ -344,8 +399,7 @@ begin
     where name like keyword
        or email like keyword
        or cast(id as char) like keyword
-    limit page_size
-    offset offset_index;
+    limit page_size offset offset_index;
 end $$
 DELIMITER ;
 
@@ -371,14 +425,117 @@ DELIMITER ;
 # Tao procedure bang enrollment
 
 DELIMITER $$
-create procedure find_all_enrollments_by_student_id(
-    id_in int
+create procedure get_enrollments_total_pages(
+    page_size int,
+    out total_page int
 )
 begin
-    select e.id, e.student_id, e.course_id, c.name as course_name, e.registered_at, e.status
+    declare courses_count int;
+    set courses_count = (select count(id) from enrollment);
+    set total_page = CEIL(courses_count / page_size);
+end $$
+DELIMITER ;
+
+DELIMITER $$
+create procedure find_students_by_course(
+    current_page INT,
+    page_size INT
+)
+begin
+    DECLARE offset_index INT;
+    SET offset_index = (current_page - 1) * page_size;
+    select e.id, e.student_id, s.name as student_name, e.course_id, c.name as course_name, e.registered_at, e.status
     from enrollment as e
              inner join course c on e.course_id = c.id
-    where student_id = id_in;
+             inner join student s on e.student_id = s.id
+    LIMIT page_size OFFSET offset_index;
+end $$
+DELIMITER ;
+
+
+# drop procedure find_enrollments_by_student_id_with_sorting;
+
+DELIMITER $$
+create procedure find_enrollments_by_student_id_with_sorting(
+    id_in int,
+    current_page INT,
+    page_size INT,
+    sortOrder varchar(20)
+)
+begin
+    DECLARE offset_index INT;
+    SET offset_index = (current_page - 1) * page_size;
+
+    IF sortOrder = 'nameASC' THEN
+        select e.id, e.student_id, e.course_id, c.name as course_name, e.registered_at, e.status
+        from enrollment as e
+                 inner join course c on e.course_id = c.id
+        where student_id = id_in
+        order by name
+        LIMIT page_size OFFSET offset_index;
+
+    ELSEIF sortOrder = 'nameDESC' THEN
+        select e.id, e.student_id, e.course_id, c.name as course_name, e.registered_at, e.status
+        from enrollment as e
+                 inner join course c on e.course_id = c.id
+        where student_id = id_in
+        order by name desc
+        LIMIT page_size OFFSET offset_index;
+
+    ELSEIF sortOrder = 'createDateASC' THEN
+        select e.id, e.student_id, e.course_id, c.name as course_name, e.registered_at, e.status
+        from enrollment as e
+                 inner join course c on e.course_id = c.id
+        where student_id = id_in
+        order by registered_at
+        LIMIT page_size OFFSET offset_index;
+
+    ELSEIF sortOrder = 'createDateDESC' THEN
+        select e.id, e.student_id, e.course_id, c.name as course_name, e.registered_at, e.status
+        from enrollment as e
+                 inner join course c on e.course_id = c.id
+        where student_id = id_in
+        order by registered_at desc
+        LIMIT page_size OFFSET offset_index;
+
+    ELSE
+        -- sortOrder = 'NONE' hoac khong hop le: khong sap xep
+        select e.id, e.student_id, e.course_id, c.name as course_name, e.registered_at, e.status
+        from enrollment as e
+                 inner join course c on e.course_id = c.id
+        where student_id = id_in
+        LIMIT page_size OFFSET offset_index;
+    END IF;
+end $$
+DELIMITER ;
+
+DELIMITER $$
+create procedure get_enrollments_by_student_id_total_pages(
+    id_in int,
+    page_size int,
+    out total_page int
+)
+begin
+    declare courses_count int;
+    set courses_count = (select count(id) from enrollment where student_id = id_in);
+    set total_page = CEIL(courses_count / page_size);
+end $$
+DELIMITER ;
+
+DELIMITER $$
+create procedure count_already_enrollment(
+    student_id_in int,
+    course_id_in int,
+    out count_out int
+)
+begin
+    select count(id)
+    into count_out
+    from enrollment
+    where student_id = student_id_in
+      and course_id = course_id_in
+      and (status = 'CONFIRM'
+        OR status = 'WAITING');
 end $$
 DELIMITER ;
 
@@ -413,16 +570,6 @@ begin
     from enrollment as e
              inner join course c on e.course_id = c.id
     where e.id = id_in;
-end $$
-DELIMITER ;
-
-DELIMITER $$
-create procedure find_students_by_course()
-begin
-    select e.id, e.student_id, s.name as student_name, e.course_id, c.name as course_name, e.registered_at, e.status
-    from enrollment as e
-             inner join course c on e.course_id = c.id
-             inner join student s on e.student_id = s.id;
 end $$
 DELIMITER ;
 
@@ -464,7 +611,7 @@ begin
     limit 5;
 end $$
 DELIMITER ;
-# drop procedure get_courses_have_more_than_10_student;
+
 DELIMITER $$
 create procedure get_courses_have_more_than_10_student()
 begin
@@ -473,7 +620,43 @@ begin
                   as count_students
     from enrollment e
              inner join course c on e.course_id = c.id
+    WHERE e.status = 'CONFIRM'
     group by e.course_id
     having count(e.student_id) > 10;
+end $$
+DELIMITER ;
+
+# drop procedure get_courses_have_more_than_10_student;
+# DELIMITER $$
+# CREATE PROCEDURE get_courses_more_than_10_student_total_pages (
+#     IN page_size INT,
+#     OUT total_page INT
+# )
+# BEGIN
+#     DECLARE courses_count INT;
+#
+#     SELECT COUNT(*) INTO courses_count
+#     FROM (
+#              SELECT e.course_id
+#              FROM enrollment e
+#              WHERE e.status = 'CONFIRM'
+#              GROUP BY e.course_id
+#              HAVING COUNT(e.student_id) > 10
+#          ) AS sub;
+#
+#     SET total_page = CEIL(courses_count / page_size);
+# END $$
+# DELIMITER ;
+
+
+DELIMITER $$
+create procedure get_enrollments_total_pages(
+    page_size int,
+    out total_page int
+)
+begin
+    declare courses_count int;
+    set courses_count = (select count(id) from enrollment);
+    set total_page = CEIL(courses_count / page_size);
 end $$
 DELIMITER ;

@@ -9,8 +9,8 @@ public class Pagination {
     public static final String RED = "\033[0;31m";
 
     public static int handlePagination(Scanner scanner, int currentPage, int totalPages) {
-        String pre = currentPage > 1 ? "Previous " : "";
-        String next = currentPage < totalPages ? " Next" : "";
+        String pre = currentPage > 1 ? "previous " : "";
+        String next = currentPage < totalPages ? " next" : "";
         StringBuilder pageNumberDisplay = new StringBuilder();
 
         for (int i = 1; i <= totalPages; i++) {
@@ -26,7 +26,7 @@ public class Pagination {
             }
         }
 
-        System.out.println(pre + pageNumberDisplay + next);
+        System.out.println("Page: " + pre + pageNumberDisplay + next);
 
         String choice = Validator.inputNotEmptyData(scanner, "Nhap so trang (hoac prev/next) de chuyen trang, nhap exit de tro ve menu: ")
                 .trim().toLowerCase();

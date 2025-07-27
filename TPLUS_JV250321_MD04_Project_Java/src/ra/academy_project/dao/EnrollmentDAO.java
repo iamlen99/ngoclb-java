@@ -10,15 +10,23 @@ import java.util.Optional;
 public interface EnrollmentDAO {
     boolean save (Enrollment enrollment);
 
-    List<Enrollment> findByStudentId (int studentId);
+    List<Enrollment> findByStudentId (int studentId, int currentPage, int pageSize, String sortOrder);
+
+    int getEnrolledTotalPages (int studentId, int pageSize);
 
     boolean cancel(int enrollmentId);
 
     Optional<Enrollment> findById(int enrollmentId);
 
-    List<CourseEnrolledStudent> findAll();
+    List<CourseEnrolledStudent> findAll(int currentPage, int pageSize);
+
+    int getTotalPages(int pageSize);
 
     boolean approve(int enrollmentId, EnrollmentStatus status);
 
     boolean delete(int enrollmentId);
+
+    int countWaittingStatus();
+
+    int countAlreadyEnrollment(int studentId, int courseId);
 }

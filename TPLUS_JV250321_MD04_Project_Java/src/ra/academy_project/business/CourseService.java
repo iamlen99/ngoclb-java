@@ -24,5 +24,4 @@ public interface CourseService {
 
     int getTotalPagesByFoundName(String name, int pageSize);
 
-//    void displayPagination (List<Course> courses, int currentPage, int pageSize);
 }

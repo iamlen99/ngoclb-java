@@ -5,6 +5,7 @@ import ra.academy_project.business.impl.EnrollmentServiceImpl;
 import ra.academy_project.model.CourseEnrolledStudent;
 import ra.academy_project.model.Enrollment;
 import ra.academy_project.model.EnrollmentStatus;
+import ra.academy_project.pagination.Pagination;
 import ra.academy_project.validation.Validator;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class EnrollmentManagementPresentation {
 
             switch (choice) {
                 case 1:
-                    displayCourseEnrolledStudents();
+                    displayCourseEnrolledStudents(scanner);
                     break;
 
                 case 2:
@@ -53,29 +54,41 @@ public class EnrollmentManagementPresentation {
         } while (!isExit);
     }
 
-    public List<CourseEnrolledStudent> displayCourseEnrolledStudents() {
-        List<CourseEnrolledStudent> enrolledStudentList = enrollmentService.getCourseEnrolledStudents();
-        if (enrolledStudentList.isEmpty()) {
-            System.out.println("Danh sach trong");
-        } else {
-            System.out.printf("| %-12s | %-12s | %-22s | %-11s | %-20s | %-20s | %-10s |\n", "Ma dang ky", "Ma sinh vien", "Ten sinh vien"
-                    , "Ma khoa hoc", "Ten khoa hoc", "Ngay dang ky", "Trang thai");
-            enrolledStudentList.forEach(System.out::println);
-        }
-        return enrolledStudentList;
+    public void displayCourseEnrolledStudents(Scanner scanner) {
+        int currentPage = 1;
+        final int pageSize = 5;
+        int totalPages = enrollmentService.getEnrolledStudentsTotalPages(pageSize);
+
+        do{
+            List<CourseEnrolledStudent> enrolledStudentList = enrollmentService.getCourseEnrolledStudents(currentPage, pageSize);
+            enrollmentService.displayEnrolledStudents(enrolledStudentList);
+
+            int nextPage = Pagination.handlePagination(scanner, currentPage, totalPages);
+            if (nextPage == -1) {
+                break;
+            }
+            currentPage = nextPage;
+        } while (true);
     }
 
     public void approveEnrollment(Scanner scanner) {
-        List<CourseEnrolledStudent> enrolledStudentList = enrollmentService.getCourseEnrolledStudents();
-        boolean isHaveWaitingStatus = enrolledStudentList.stream()
-                .anyMatch(student -> student.getStatus().equals(EnrollmentStatus.WAITING));
-        if (!isHaveWaitingStatus) {
+        if (!enrollmentService.isExistWaitingStatus()) {
             System.out.println("Toan bo danh sach da duoc duyet");
             return;
         }
 
-        int enrollmentId = inputEnrollmentId(scanner, "Nhap ma dang ky cua sinh vien can duyet dang ky khoa hoc: ");
+        System.out.print("Ban co chac chan muon duyet hay khong hay chi xem thoi?, neu co nhap 'yes', neu khong bam phim bat ky de thoat: ");
+        if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+            return;
+        }
+
+        int enrollmentId = Validator.inputValidInteger(scanner, "Nhap ma dang ky cua sinh vien can duyet dang ky khoa hoc: ");
         Optional<Enrollment> approveEnrollment = enrollmentService.getEnrollmentById(enrollmentId);
+        if (approveEnrollment.isEmpty()) {
+            System.out.println("Id ban nhap khong ton tai");
+            return;
+        }
+
         if (!approveEnrollment.get().getStatus().equals(EnrollmentStatus.WAITING)) {
             System.out.println("Khong the duyet dang ky khi trang thai dang ky khac Waiting");
             return;
@@ -100,11 +113,9 @@ public class EnrollmentManagementPresentation {
 
     public int inputEnrollmentId(Scanner scanner, String message) {
         do {
-            List<CourseEnrolledStudent> enrolledStudentList = displayCourseEnrolledStudents();
             int enrollmentId = Validator.inputValidInteger(scanner, message);
-            boolean isExistEnrollmentId = enrolledStudentList.stream()
-                    .anyMatch(enrollment -> enrollmentId == enrollment.getEnrollmentId());
-            if (isExistEnrollmentId) {
+            Optional<Enrollment> enrollment = enrollmentService.getEnrollmentById(enrollmentId);
+            if (enrollment.isPresent()) {
                 return enrollmentId;
             }
             System.out.println("Id ban nhap khong ton tai");
@@ -112,6 +123,11 @@ public class EnrollmentManagementPresentation {
     }
 
     public void deleteEnrollment(Scanner scanner) {
+        System.out.print("Ban da co ma dang ky de xoa chua?, neu co nhap 'yes', neu khong bam phim bat ky de thoat: ");
+        if (!scanner.nextLine().equalsIgnoreCase("yes")) {
+            return;
+        }
+
         int enrollmentId = inputEnrollmentId(scanner, "Nhap ma dang ky cua sinh vien can xoa khoi khoa hoc: ");
         System.out.print("Ban co chac chan xoa sinh vien nay khong (neu co nhap 'y'): ");
         String message = scanner.nextLine();

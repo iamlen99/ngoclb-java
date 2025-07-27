@@ -6,15 +6,14 @@ import ra.academy_project.business.StudentService;
 import ra.academy_project.business.impl.CourseServiceImpl;
 import ra.academy_project.business.impl.EnrollmentServiceImpl;
 import ra.academy_project.business.impl.StudentServiceImpl;
-import ra.academy_project.model.Course;
-import ra.academy_project.model.Enrollment;
-import ra.academy_project.model.EnrollmentStatus;
-import ra.academy_project.model.Student;
+import ra.academy_project.model.*;
+import ra.academy_project.pagination.Pagination;
 import ra.academy_project.validation.Validator;
 
 import java.util.*;
 
 public class StudentPresentation {
+    private static final int pageSize = 5;
     public final StudentService studentService;
     public final CourseService courseService;
     public final EnrollmentService enrollmentService;
@@ -108,7 +107,7 @@ public class StudentPresentation {
 
             switch (choice) {
                 case 1:
-                    displayAllCourses();
+                    displayAllCourses(scanner, "noSort");
                     break;
 
                 case 2:
@@ -125,60 +124,59 @@ public class StudentPresentation {
         } while (!isExit);
     }
 
-    public void displayAllCourses() {
-//        final int currentPage = 1;
-//        final int pageSize = 5;
-//        List<Course> courses = courseService.findAll(currentPage, pageSize);
-//        courseService.displayCourses(courses);
+    public void displayAllCourses(Scanner scanner, String sortOrder) {
+        int currentPage = 1;
+        int totalPages = courseService.getTotalPages(pageSize);
+
+        do {
+            List<Course> courses = courseService.findAll(currentPage, pageSize, sortOrder);
+            courseService.displayCourses(courses);
+            int nextPage = Pagination.handlePagination(scanner, currentPage, totalPages);
+            if (nextPage == -1) break;
+            currentPage = nextPage;
+        } while (true);
     }
 
     public void findCourseByName(Scanner scanner) {
-        System.out.print("Nhap ten khoa hoc can tim: ");
-        String courseName = scanner.nextLine();
-//        courseService.findCourseByName(courseName);
-    }
-
-    public Enrollment inputEnrollmentData(Scanner scanner) {
-        Integer courseId = inputCourseId(scanner, "Nhap ma khoa hoc can dang ky: ");
-        if (courseId == null) {
-            return null;
+        String courseName = Validator.inputNotEmptyData(scanner, "Nhap ten khoa hoc can tim: ");
+        int currentPage = 1;
+        int totalPages = courseService.getTotalPagesByFoundName(courseName, pageSize);
+        if (totalPages == 0) {
+            System.out.println("Khong tim thay khoa hoc nao voi tu khoa ban vua nhap");
+            return;
         }
-
-        Enrollment enrollment = new Enrollment();
-        enrollment.setStudentId(currentStudent.getId());
-        enrollment.setCourseId(courseId);
-        return enrollment;
+        do {
+            List<Course> courses = courseService.findCourseByName(courseName, currentPage, pageSize);
+            courseService.displayCourses(courses);
+            int nextPage = Pagination.handlePagination(scanner, currentPage, totalPages);
+            if (nextPage == -1) break;
+            currentPage = nextPage;
+        } while (true);
     }
 
     public void addEnrollment(Scanner scanner) {
-        displayAllCourses();
-        Enrollment enrollment = inputEnrollmentData(scanner);
-        if (enrollment == null) {
-            return;
-        }
+        int courseId = inputCourseId(scanner, "Nhap ma khoa hoc can dang ky: ");
+        Enrollment enrollment = new Enrollment();
+        enrollment.setStudentId(currentStudent.getId());
+        enrollment.setCourseId(courseId);
         enrollmentService.addEnrollment(enrollment);
     }
 
-    public Integer inputCourseId(Scanner scanner, String message) {
-        List<Enrollment> enrollmentList = enrollmentService.getEnrollmentByStudentId(currentStudent.getId());
+    public int inputCourseId(Scanner scanner, String message) {
+        do {
+            int courseId = Validator.inputValidInteger(scanner, message);
+            Optional<Course> course = courseService.findCourseById(courseId);
 
-        int courseId = Validator.inputValidInteger(scanner, message);
-        Optional<Course> course = courseService.findCourseById(courseId);
-        if (course.isEmpty()) {
-            System.out.println("Khong tim thay khoa hoc co id ban vua nhap");
-            return null;
-        }
+            if (course.isEmpty()) {
+                System.out.println("Khong tim thay khoa hoc co id ban vua nhap");
+                continue;
+            }
 
-        boolean alreadyEnrolled = enrollmentList.stream()
-                .anyMatch(enrollment -> enrollment.getCourseId() == courseId
-                        && (enrollment.getStatus() == EnrollmentStatus.WAITING
-                        || enrollment.getStatus() == EnrollmentStatus.CONFIRM));
-
-        if (alreadyEnrolled) {
-            System.out.println("Ban da dang ki khoa hoc nay roi");
-            return null;
-        }
-        return courseId;
+            if (!enrollmentService.isAlreadyEnrolled(currentStudent.getId(), courseId)) {
+                return courseId;
+            }
+            System.out.println("Ban da dang ky khoa hoc nay roi!");
+        } while (true);
     }
 
     public void displayEnrollmentMenu(Scanner scanner) {
@@ -192,7 +190,7 @@ public class StudentPresentation {
 
             switch (choice) {
                 case 1:
-                    displayEnrollment();
+                    displayEnrollments(scanner, "noSorting");
                     break;
 
                 case 2:
@@ -209,14 +207,20 @@ public class StudentPresentation {
         } while (!isExit);
     }
 
-    public void displayEnrollment() {
-        List<Enrollment> enrollmentList = enrollmentService.getEnrollmentByStudentId(currentStudent.getId());
-        if (!enrollmentList.isEmpty()) {
-            Course.printMenu();
-            enrollmentList.forEach(System.out::println);
-        } else {
-            System.out.println("Ban chua dang ky khoa hoc nao");
-        }
+    public void displayEnrollments(Scanner scanner, String sortOrder) {
+        int currentPage = 1;
+        int totalPages = enrollmentService.getTotalPagesByEnrolledStudentId(currentStudent.getId(), pageSize);
+
+        do {
+            List<Enrollment> enrollmentList = enrollmentService.getEnrollmentByStudentId(currentStudent.getId(), currentPage, pageSize, sortOrder);
+            enrollmentService.displayEnrollmentByStudentId(enrollmentList);
+
+            int nextPage = Pagination.handlePagination(scanner, currentPage, totalPages);
+            if (nextPage == -1) {
+                break;
+            }
+            currentPage = nextPage;
+        } while (true);
     }
 
     public void displaySortEnrollmentMenu(Scanner scanner) {
@@ -231,19 +235,19 @@ public class StudentPresentation {
             int choice = Validator.inputValidInteger(scanner, "Nhap lua chon: ");
             switch (choice) {
                 case 1:
-                    sortCourseByCourseNameASC();
+                    displayEnrollments(scanner, "nameASC");
                     break;
 
                 case 2:
-                    sortCourseByCourseNameDESC();
+                    displayEnrollments(scanner, "nameDESC");
                     break;
 
                 case 3:
-                    sortCourseByRegisteredDateASC();
+                    displayEnrollments(scanner, "createDateASC");
                     break;
 
                 case 4:
-                    sortCourseByRegisteredDateDESC();
+                    displayEnrollments(scanner, "createDateDESC");
                     break;
 
                 case 5:
@@ -256,56 +260,7 @@ public class StudentPresentation {
         } while (!isExit);
     }
 
-    public void sortCourseByCourseNameASC() {
-        List<Enrollment> enrollmentList = enrollmentService.getEnrollmentByStudentId(currentStudent.getId());
-        if (!enrollmentList.isEmpty()) {
-            Course.printMenu();
-            enrollmentList.stream()
-                    .sorted(Comparator.comparing(Enrollment::getCourseName))
-                    .forEach(System.out::println);
-        } else {
-            System.out.println("Ban chua dang ky khoa hoc nao");
-        }
-    }
-
-    public void sortCourseByCourseNameDESC() {
-        List<Enrollment> enrollmentList = enrollmentService.getEnrollmentByStudentId(currentStudent.getId());
-        if (!enrollmentList.isEmpty()) {
-            Course.printMenu();
-            enrollmentList.stream()
-                    .sorted(Comparator.comparing(Enrollment::getCourseName).reversed())
-                    .forEach(System.out::println);
-        } else {
-            System.out.println("Ban chua dang ky khoa hoc nao");
-        }
-    }
-
-    public void sortCourseByRegisteredDateASC() {
-        List<Enrollment> enrollmentList = enrollmentService.getEnrollmentByStudentId(currentStudent.getId());
-        if (!enrollmentList.isEmpty()) {
-            Course.printMenu();
-            enrollmentList.stream()
-                    .sorted(Comparator.comparing(Enrollment::getRegisteredDate))
-                    .forEach(System.out::println);
-        } else {
-            System.out.println("Ban chua dang ky khoa hoc nao");
-        }
-    }
-
-    public void sortCourseByRegisteredDateDESC() {
-        List<Enrollment> enrollmentList = enrollmentService.getEnrollmentByStudentId(currentStudent.getId());
-        if (!enrollmentList.isEmpty()) {
-            Course.printMenu();
-            enrollmentList.stream()
-                    .sorted(Comparator.comparing(Enrollment::getRegisteredDate).reversed())
-                    .forEach(System.out::println);
-        } else {
-            System.out.println("Ban chua dang ky khoa hoc nao");
-        }
-    }
-
     public void cancelEnrollmentByCourseId(Scanner scanner) {
-        displayEnrollment();
         int cancelledId = Validator.inputValidInteger(scanner, "Nhap ma dang ky cua khoa hoc can huy: ");
         enrollmentService.getEnrollmentById(cancelledId).ifPresentOrElse(enrollmentService::cancelEnrollment,
                 () -> {

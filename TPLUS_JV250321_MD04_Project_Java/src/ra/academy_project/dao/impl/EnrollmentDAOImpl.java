@@ -6,10 +6,7 @@ import ra.academy_project.model.Enrollment;
 import ra.academy_project.model.EnrollmentStatus;
 import ra.academy_project.utils.DBUtil;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -38,15 +35,41 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         return false;
     }
 
+
     @Override
-    public List<Enrollment> findByStudentId(int studentId) {
+    public int getEnrolledTotalPages(int studentId, int pageSize) {
+        Connection conn = null;
+        CallableStatement callStmt = null;
+        int totalPage = 0;
+        try {
+            conn = DBUtil.openConnection();
+            callStmt = conn.prepareCall("{call get_enrollments_by_student_id_total_pages(?,?,?)}");
+            callStmt.setInt(1, studentId);
+            callStmt.setInt(2, pageSize);
+            callStmt.registerOutParameter(3, Types.INTEGER);
+            callStmt.execute();
+            totalPage = callStmt.getInt(3);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closeCallableStatement(callStmt);
+            DBUtil.closeConnection(conn);
+        }
+        return totalPage;
+    }
+
+    @Override
+    public List<Enrollment> findByStudentId(int studentId, int currentPage, int pageSize, String sortOrder) {
         List<Enrollment> enrollmentList = null;
         Connection conn = null;
         CallableStatement callStmt = null;
         try {
             conn = DBUtil.openConnection();
-            callStmt = conn.prepareCall("CALL find_all_enrollments_by_student_id(?)");
+            callStmt = conn.prepareCall("CALL find_enrollments_by_student_id_with_sorting(?,?,?,?)");
             callStmt.setInt(1, studentId);
+            callStmt.setInt(2, currentPage);
+            callStmt.setInt(3, pageSize);
+            callStmt.setString(4, sortOrder);
             ResultSet rs = callStmt.executeQuery();
             enrollmentList = new ArrayList<>();
             while (rs.next()) {
@@ -120,13 +143,15 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
     }
 
     @Override
-    public List<CourseEnrolledStudent> findAll() {
+    public List<CourseEnrolledStudent> findAll(int currentPage, int pageSize) {
         List<CourseEnrolledStudent> listEnrolledStudent = null;
         Connection conn = null;
         CallableStatement callStmt = null;
         try {
             conn = DBUtil.openConnection();
-            callStmt = conn.prepareCall("CALL find_students_by_course()");
+            callStmt = conn.prepareCall("CALL find_students_by_course(?,?)");
+            callStmt.setInt(1, currentPage);
+            callStmt.setInt(2, pageSize);
             ResultSet rs = callStmt.executeQuery();
             listEnrolledStudent = new ArrayList<>();
             while (rs.next()) {
@@ -148,6 +173,27 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             DBUtil.closeConnection(conn);
         }
         return listEnrolledStudent;
+    }
+
+    @Override
+    public int getTotalPages(int pageSize) {
+        Connection conn = null;
+        CallableStatement callStmt = null;
+        int totalPage = 0;
+        try {
+            conn = DBUtil.openConnection();
+            callStmt = conn.prepareCall("{call get_enrollments_total_pages(?,?)}");
+            callStmt.setInt(1, pageSize);
+            callStmt.registerOutParameter(2, Types.INTEGER);
+            callStmt.execute();
+            totalPage = callStmt.getInt(2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closeCallableStatement(callStmt);
+            DBUtil.closeConnection(conn);
+        }
+        return totalPage;
     }
 
     @Override
@@ -189,5 +235,50 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             DBUtil.closeConnection(conn);
         }
         return false;
+    }
+
+    @Override
+    public int countWaittingStatus() {
+        Connection conn = null;
+        PreparedStatement preStmt = null;
+        String approveSql = "select count(id) as count_status from enrollment where status = ?";
+        int countStatus = 0;
+        try {
+            conn = DBUtil.openConnection();
+            preStmt = conn.prepareStatement(approveSql);
+            preStmt.setString(1, EnrollmentStatus.WAITING.name());
+            ResultSet rs = preStmt.executeQuery();
+           if (rs.next()) {
+               countStatus = rs.getInt("count_status");
+           }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closePreparedStatement(preStmt);
+            DBUtil.closeConnection(conn);
+        }
+        return countStatus;
+    }
+
+    @Override
+    public int countAlreadyEnrollment(int studentId, int courseId) {
+        Connection conn = null;
+        CallableStatement callStmt = null;
+        int countEnrolled = 0;
+        try {
+            conn = DBUtil.openConnection();
+            callStmt = conn.prepareCall("{call count_already_enrollment(?,?,?)}");
+            callStmt.setInt(1, studentId);
+            callStmt.setInt(2, courseId);
+            callStmt.registerOutParameter(3, Types.INTEGER);
+            callStmt.execute();
+            countEnrolled = callStmt.getInt(3);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closeCallableStatement(callStmt);
+            DBUtil.closeConnection(conn);
+        }
+        return countEnrolled;
     }
 }

@@ -67,9 +67,4 @@ public class Course {
         return String.format("| %-3d | %-22s | %-10s | %-15s | %-10s |", this.id, this.name, this.duration + " gio"
                 , this.instructor, this.createAt.format(Validator.formatter));
     }
-
-    public static void printMenu() {
-        System.out.printf("| %-12s | %-12s | %-11s | %-20s | %-20s | %-10s |\n", "Ma dang ky", "Ma sinh vien"
-                , "Ma khoa hoc", "Ten khoa hoc", "Ngay dang ky", "Trang thai");
-    }
 }
