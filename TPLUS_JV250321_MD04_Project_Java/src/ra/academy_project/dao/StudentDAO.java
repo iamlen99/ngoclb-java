@@ -9,7 +9,9 @@ import java.util.Optional;
 public interface StudentDAO {
     Optional<Student> getAccount(String email, String password);
 
-    List<Student> findAll();
+    List<Student> findAll(int currentPage, int pageSize, String sortOrder);
+
+    int getTotalPages(int pageSize);
 
     boolean save(Student student);
 
@@ -22,7 +24,9 @@ public interface StudentDAO {
 
     boolean delete(int id);
 
-    List<Student> search(String searchValue);
+    List<Student> search(String searchValue, int currentPage, int pageSize);
+
+    int getSearchedTotalPages(String searchValue, int pageSize);
 
     boolean changePassword(int studentId, String password);
 }

@@ -1,5 +1,6 @@
 package ra.academy_project.validation;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -37,6 +38,80 @@ public class Validator {
                 return Integer.parseInt(input);
             }
             System.err.print("Vui long nhap vao mot so nguyen: ");
+        } while (true);
+    }
+
+    public static int inputPositiveInteger(Scanner scanner, String message) {
+        do {
+            int input = Validator.inputValidInteger(scanner, message);
+            if (input > 0) {
+                return input;
+            }
+            System.err.println("Vui long nhap vao mot so nguyen duong");
+        } while (true);
+    }
+
+    public static LocalDate inputDateOfBirth(Scanner scanner, String message) {
+        System.out.print(message);
+        do {
+            String dateOfBirth = scanner.nextLine();
+            if (!dateOfBirth.isEmpty()) {
+                try {
+                    return LocalDate.parse(dateOfBirth, Validator.formatter);
+                } catch (Exception e) {
+                    System.out.print("Dinh dang ngay khong hop le (Dung: dd/MM/yyyy), hay nhap lai: ");
+                }
+            } else {
+                System.out.print("Ngay sinh khong duoc de trong, vui long nhap ngay sinh (dd/MM/yyyy): ");
+            }
+        } while (true);
+    }
+
+    public static boolean inputGender(Scanner scanner, String message) {
+        System.out.print(message);
+        do {
+            String gender = scanner.nextLine();
+            if (!Validator.isEmpty(gender)) {
+                if (gender.equalsIgnoreCase("nam")) {
+                    return true;
+                } else if (gender.equalsIgnoreCase("nu")) {
+                    return false;
+                } else {
+                    System.out.print("Gia tri nhap khong hop le, xin hay nhap lai gioi tinh (nam/nu): ");
+                }
+            } else {
+                System.out.print("Gioi tinh khong duoc de trong, xin hay nhap gioi tinh (nam/nu): ");
+            }
+        } while (true);
+    }
+
+    public static String inputPhone(Scanner scanner, String message) {
+        System.out.print(message);
+        do {
+            String phone = scanner.nextLine();
+            if (Validator.isEmpty(phone)) {
+                return null;
+            }
+            if (Validator.isValidPhoneNumber(phone)) {
+                return phone;
+            }
+            System.out.println("Dinh dang dien thoai khong hop le, xin hay nhap lai phone (hoac co the khong nhap): ");
+        } while (true);
+    }
+
+    public static String inputPassword(Scanner scanner, String message) {
+        System.out.print(message);
+        do {
+            String password = scanner.nextLine();
+            if (Validator.isEmpty(password)) {
+                System.out.print("Mat khau khong duoc de trong, xin hay nhap mat khau: ");
+            } else {
+                if (Validator.isValidPassword(password)) {
+                    return password;
+                }
+                System.out.println("Mat khau phai bao gom chu hoa, chu thuong, 1 ky tu la so, 1 ky tu dac biet\n"
+                        + "toi thieu 8 ki tu va toi da 20 ky tu");
+            }
         } while (true);
     }
 

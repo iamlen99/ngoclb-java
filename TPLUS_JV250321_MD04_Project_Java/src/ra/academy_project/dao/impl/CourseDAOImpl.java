@@ -7,6 +7,7 @@ import ra.academy_project.utils.DBUtil;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +16,16 @@ import java.util.Optional;
 public class CourseDAOImpl implements CourseDAO {
 
     @Override
-    public List<Course> findAll() {
+    public List<Course> findAll(int currentPage, int pageSize, String sortOrder) {
         Connection conn = null;
         CallableStatement callStmt = null;
         List<Course> courseList = null;
         try {
             conn = DBUtil.openConnection();
-            callStmt = conn.prepareCall("{call find_all_courses()}");
+            callStmt = conn.prepareCall("{call find_courses_with_sorting(?,?,?)}");
+            callStmt.setInt(1, currentPage);
+            callStmt.setInt(2, pageSize);
+            callStmt.setString(3, sortOrder);
             ResultSet rs = callStmt.executeQuery();
             courseList = new ArrayList<>();
             while (rs.next()) {
@@ -41,6 +45,27 @@ public class CourseDAOImpl implements CourseDAO {
             DBUtil.closeConnection(conn);
         }
         return courseList;
+    }
+
+    @Override
+    public int getTotalPages(int pageSize) {
+        Connection conn = null;
+        CallableStatement callStmt = null;
+        int totalPage = 0;
+        try {
+            conn = DBUtil.openConnection();
+            callStmt = conn.prepareCall("{call get_course_total_pages(?,?)}");
+            callStmt.setInt(1, pageSize);
+            callStmt.registerOutParameter(2, Types.INTEGER);
+            callStmt.execute();
+            totalPage = callStmt.getInt(2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closeCallableStatement(callStmt);
+            DBUtil.closeConnection(conn);
+        }
+        return totalPage;
     }
 
     @Override
@@ -134,14 +159,16 @@ public class CourseDAOImpl implements CourseDAO {
     }
 
     @Override
-    public List<Course> findByName(String name) {
+    public List<Course> findByName(String name, int currentPage, int pageSize) {
         Connection conn = null;
         CallableStatement callStmt = null;
         List<Course> courseList = null;
         try {
             conn = DBUtil.openConnection();
-            callStmt = conn.prepareCall("{call search_course_by_name(?)}");
+            callStmt = conn.prepareCall("{call search_course_by_name(?,?,?)}");
             callStmt.setString(1, name);
+            callStmt.setInt(2, currentPage);
+            callStmt.setInt(3, pageSize);
             ResultSet rs = callStmt.executeQuery();
             courseList = new ArrayList<>();
             while (rs.next()) {
@@ -161,5 +188,27 @@ public class CourseDAOImpl implements CourseDAO {
             DBUtil.closeConnection(conn);
         }
         return courseList;
+    }
+
+    @Override
+    public int getTotalPagesByFoundName(String name, int pageSize) {
+        Connection conn = null;
+        CallableStatement callStmt = null;
+        int totalPage = 0;
+        try {
+            conn = DBUtil.openConnection();
+            callStmt = conn.prepareCall("{call get_found_course_total_pages(?,?,?)}");
+            callStmt.setString(1, name);
+            callStmt.setInt(2, pageSize);
+            callStmt.registerOutParameter(3, Types.INTEGER);
+            callStmt.execute();
+            totalPage = callStmt.getInt(3);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closeCallableStatement(callStmt);
+            DBUtil.closeConnection(conn);
+        }
+        return totalPage;
     }
 }

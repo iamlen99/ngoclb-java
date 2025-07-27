@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CourseService {
-    List<Course> findAll();
+    List<Course> findAll(int currentPage, int pageSize,  String sortOrder);
+
+    int getTotalPages(int pageSize);
+
+    void displayCourses(List<Course> courses);
 
     void addCourse(Course course);
 
@@ -16,5 +20,9 @@ public interface CourseService {
 
     void deleteCourse(Course course);
 
-    void findCourseByName(String name);
+    List<Course> findCourseByName(String name, int currentPage, int pageSize);
+
+    int getTotalPagesByFoundName(String name, int pageSize);
+
+//    void displayPagination (List<Course> courses, int currentPage, int pageSize);
 }

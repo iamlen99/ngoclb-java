@@ -64,7 +64,7 @@ public class Course {
 
     @Override
     public String toString() {
-        return String.format("| %-3d | %-20s | %-10s | %-15s | %-10s |", this.id, this.name, this.duration + " gio"
+        return String.format("| %-3d | %-22s | %-10s | %-15s | %-10s |", this.id, this.name, this.duration + " gio"
                 , this.instructor, this.createAt.format(Validator.formatter));
     }
 

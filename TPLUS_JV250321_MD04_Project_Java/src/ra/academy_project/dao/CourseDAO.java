@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CourseDAO {
-    List<Course> findAll();
+    List<Course> findAll(int currentPage, int pageSize, String sortOrder);
+
+    int getTotalPages(int pageSize);
 
     boolean save (Course course);
 
@@ -16,5 +18,7 @@ public interface CourseDAO {
 
     boolean delete (int id);
 
-    List<Course> findByName(String name);
+    List<Course> findByName(String name, int currentPage, int pageSize);
+
+    int getTotalPagesByFoundName(String name, int pageSize);
 }

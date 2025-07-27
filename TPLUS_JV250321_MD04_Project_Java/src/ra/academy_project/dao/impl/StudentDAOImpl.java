@@ -47,13 +47,16 @@ public class StudentDAOImpl implements StudentDAO {
     }
 
     @Override
-    public List<Student> findAll() {
+    public List<Student> findAll(int currentPage, int pageSize, String sortOrder) {
         Connection conn = null;
         CallableStatement callStmt = null;
         List<Student> studentList = null;
         try {
             conn = DBUtil.openConnection();
-            callStmt = conn.prepareCall("{call find_all_students()}");
+            callStmt = conn.prepareCall("{call find_students_with_sorting(?,?,?)}");
+            callStmt.setInt(1, currentPage);
+            callStmt.setInt(2, pageSize);
+            callStmt.setString(3, sortOrder);
             ResultSet rs = callStmt.executeQuery();
             studentList = new ArrayList<>();
             while (rs.next()) {
@@ -76,6 +79,27 @@ public class StudentDAOImpl implements StudentDAO {
             DBUtil.closeConnection(conn);
         }
         return studentList;
+    }
+
+    @Override
+    public int getTotalPages(int pageSize) {
+        Connection conn = null;
+        CallableStatement callStmt = null;
+        int totalPage = 0;
+        try {
+            conn = DBUtil.openConnection();
+            callStmt = conn.prepareCall("{call get_students_total_pages(?,?)}");
+            callStmt.setInt(1, pageSize);
+            callStmt.registerOutParameter(2, Types.INTEGER);
+            callStmt.execute();
+            totalPage = callStmt.getInt(2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closeCallableStatement(callStmt);
+            DBUtil.closeConnection(conn);
+        }
+        return totalPage;
     }
 
     @Override
@@ -200,14 +224,16 @@ public class StudentDAOImpl implements StudentDAO {
     }
 
     @Override
-    public List<Student> search(String searchValue) {
+    public List<Student> search(String searchValue, int currentPage, int pageSize) {
         Connection conn = null;
         CallableStatement callStmt = null;
         List<Student> studentList = null;
         try {
             conn = DBUtil.openConnection();
-            callStmt = conn.prepareCall("{call search_students(?)}");
+            callStmt = conn.prepareCall("{call search_students(?,?,?)}");
             callStmt.setString(1, searchValue);
+            callStmt.setInt(2, currentPage);
+            callStmt.setInt(3, pageSize);
             ResultSet rs = callStmt.executeQuery();
             studentList = new ArrayList<>();
             while (rs.next()) {
@@ -229,6 +255,28 @@ public class StudentDAOImpl implements StudentDAO {
             DBUtil.closeConnection(conn);
         }
         return studentList;
+    }
+
+    @Override
+    public int getSearchedTotalPages(String searchValue, int pageSize) {
+        Connection conn = null;
+        CallableStatement callStmt = null;
+        int totalPage = 0;
+        try {
+            conn = DBUtil.openConnection();
+            callStmt = conn.prepareCall("{call get_found_students_total_pages(?,?,?)}");
+            callStmt.setString(1, searchValue);
+            callStmt.setInt(2, pageSize);
+            callStmt.registerOutParameter(3, Types.INTEGER);
+            callStmt.execute();
+            totalPage = callStmt.getInt(3);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.closeCallableStatement(callStmt);
+            DBUtil.closeConnection(conn);
+        }
+        return totalPage;
     }
 
     @Override

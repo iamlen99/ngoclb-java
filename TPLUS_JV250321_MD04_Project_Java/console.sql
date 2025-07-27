@@ -48,7 +48,22 @@ VALUES ('admin1', 'admin123'),
 INSERT INTO student (name, dob, email, sex, phone, password)
 VALUES ('Nguyen Van A', '2000-01-01', 'a.nguyen@example.com', 1, '0912345678', 'pass123'),
        ('Tran Thi B', '1999-05-20', 'b.tran@example.com', 0, '0987654321', 'abcxyz'),
-       ('Le Van C', '2001-07-15', 'c.le@example.com', 1, '0909090909', 'qwerty');
+       ('Le Van C', '2001-07-15', 'c.le@example.com', 1, '0909090909', 'qwerty'),
+    ('Pham Thi D', '1998-03-12', 'd.pham@example.com', 0, '0934567890', 'password1'),
+       ('Hoang Van E', '2002-09-25', 'e.hoang@example.com', 1, '0976543210', '12345678'),
+       ('Nguyen Thi F', '2000-11-30', 'f.nguyen@example.com', 0, '0901122334', 'letmein'),
+       ('Dang Van G', '1997-06-05', 'g.dang@example.com', 1, '0911223344', '123abc'),
+       ('Do Thi H', '2001-08-10', 'h.do@example.com', 0, '0988112233', 'abcdef'),
+       ('Vu Van I', '1999-12-01', 'i.vu@example.com', 1, '0966554433', 'zxcvbn'),
+       ('Nguyen Thi J', '2000-04-18', 'j.nguyen@example.com', 0, '0922334455', 'pass456'),
+       ('Tran Van K', '1998-07-22', 'k.tran@example.com', 1, '0933445566', 'hello123'),
+       ('Le Thi L', '1996-10-09', 'l.le@example.com', 0, '0944556677', 'password2'),
+       ('Pham Van M', '2002-03-01', 'm.pham@example.com', 1, '0900789456', '654321'),
+       ('Hoang Thi N', '2001-05-14', 'n.hoang@example.com', 0, '0912341234', 'mysecret'),
+       ('Do Van O', '1999-11-29', 'o.do@example.com', 1, '0977988776', '1q2w3e'),
+       ('Nguyen Thi P', '1997-02-07', 'p.nguyen@example.com', 0, '0955566778', 'abc123'),
+       ('Vu Thi Q', '2000-06-17', 'q.vu@example.com', 0, '0966123456', '999999');
+
 
 INSERT INTO course (name, duration, instructor)
 VALUES ('Java Programming', 60, 'Mr. Dinh'),
@@ -63,13 +78,63 @@ VALUES (1, 1, 'CONFIRM'),
 
 
 # Tao procedure bang Course
+# drop procedure get_course_total_pages;
 
 DELIMITER $$
-create procedure find_all_courses()
+create procedure get_course_total_pages(
+    page_size int,
+    out total_page int
+)
 begin
-    select * from course;
+    declare courses_count int;
+    set courses_count = (select count(id) from course);
+    set total_page = CEIL(courses_count / page_size);
 end $$
 DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE find_courses_with_sorting(
+    IN current_page INT,
+    IN page_size INT,
+    IN sortOrder VARCHAR(20) -- 'idASC', 'idDESC', 'nameASC', 'nameDESC', 'NONE'
+)
+BEGIN
+    DECLARE offset_index INT;
+    SET offset_index = (current_page - 1) * page_size;
+
+    IF sortOrder = 'idASC' THEN
+        SELECT *
+        FROM course
+        ORDER BY id ASC
+        LIMIT page_size OFFSET offset_index;
+
+    ELSEIF sortOrder = 'idDESC' THEN
+        SELECT *
+        FROM course
+        ORDER BY id DESC
+        LIMIT page_size OFFSET offset_index;
+
+    ELSEIF sortOrder = 'nameASC' THEN
+        SELECT *
+        FROM course
+        ORDER BY name ASC
+        LIMIT page_size OFFSET offset_index;
+
+    ELSEIF sortOrder = 'nameDESC' THEN
+        SELECT *
+        FROM course
+        ORDER BY name DESC
+        LIMIT page_size OFFSET offset_index;
+
+    ELSE
+        -- sortOrder = 'NONE' hoac khong hop le: khong sap xep
+        SELECT *
+        FROM course
+        LIMIT page_size OFFSET offset_index;
+    END IF;
+END$$
+DELIMITER ;
+
 
 DELIMITER $$
 create procedure add_course(
@@ -99,6 +164,7 @@ begin
 end $$
 DELIMITER ;
 
+
 DELIMITER $$
 create procedure find_course_by_id(
     id_in int
@@ -116,24 +182,102 @@ begin
     delete from course where id = id_in;
 end $$
 DELIMITER ;
+
 # drop procedure search_course_by_name;
 DELIMITER $$
 create procedure search_course_by_name(
-    name_in varchar(100)
+    name_in varchar(100),
+    current_page int,
+    page_size int
 )
 begin
     declare search_value varchar(100);
+    declare offset_index int;
     set search_value = concat('%', concat(name_in, '%'));
-    select * from course where name like search_value;
+    set offset_index = (current_page - 1) * page_size;
+    select *
+    from course
+    where name like search_value
+    limit page_size offset offset_index;
+end $$
+DELIMITER ;
+
+DELIMITER $$
+create procedure get_found_course_total_pages(
+    name_in varchar(100),
+    page_size int,
+    out total_page int
+)
+begin
+    declare courses_count int;
+    declare search_value varchar(100);
+    set search_value = concat('%', concat(name_in, '%'));
+
+    set courses_count = (select count(id) from course where name like search_value);
+    set total_page = CEIL(courses_count / page_size);
 end $$
 DELIMITER ;
 
 # Tao procedure bang Student
 
 DELIMITER $$
-create procedure find_all_students()
+
+CREATE PROCEDURE find_students_with_sorting(
+    IN current_page INT,
+    IN page_size INT,
+    IN sortOrder VARCHAR(20) -- 'idASC', 'idDESC', 'nameASC', 'nameDESC', 'NONE'
+)
+BEGIN
+    DECLARE offset_index INT;
+    SET offset_index = (current_page - 1) * page_size;
+
+    IF sortOrder = 'idASC' THEN
+        SELECT *
+        FROM student
+        ORDER BY id ASC
+        LIMIT page_size OFFSET offset_index;
+
+    ELSEIF sortOrder = 'idDESC' THEN
+        SELECT *
+        FROM student
+        ORDER BY id DESC
+        LIMIT page_size OFFSET offset_index;
+
+    ELSEIF sortOrder = 'nameASC' THEN
+        SELECT *
+        FROM student
+        ORDER BY SUBSTRING_INDEX(name, ' ', -1) ASC,                          -- ten
+                 SUBSTRING_INDEX(SUBSTRING_INDEX(name, ' ', -2), ' ', 1) ASC, -- ten dem
+                 SUBSTRING_INDEX(name, ' ', 1) ASC                            -- ho
+        LIMIT page_size OFFSET offset_index;
+
+    ELSEIF sortOrder = 'nameDESC' THEN
+        SELECT *
+        FROM student
+        ORDER BY SUBSTRING_INDEX(name, ' ', -1) DESC,
+                 SUBSTRING_INDEX(SUBSTRING_INDEX(name, ' ', -2), ' ', 1) DESC,
+                 SUBSTRING_INDEX(name, ' ', 1) DESC
+        LIMIT page_size OFFSET offset_index;
+
+    ELSE
+        SELECT *
+        FROM student
+        LIMIT page_size OFFSET offset_index;
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+create procedure get_students_total_pages(
+    page_size int,
+    out total_page int
+)
 begin
-    select * from student;
+    declare courses_count int;
+    set courses_count = (select count(id) from student);
+    set total_page = CEIL(courses_count / page_size);
 end $$
 DELIMITER ;
 
@@ -183,18 +327,44 @@ begin
 end $$
 DELIMITER ;
 
+# drop procedure search_students;
 DELIMITER $$
 create procedure search_students(
-    keyword_in varchar(100)
+    keyword_in varchar(100),
+    current_page int,
+    page_size int
 )
 begin
     declare keyword varchar(100);
+    declare offset_index int;
     set keyword = concat('%', keyword_in, '%');
+    set offset_index = (current_page - 1) * page_size;
     select *
     from student
     where name like keyword
        or email like keyword
-       or cast(id as char) like keyword;
+       or cast(id as char) like keyword
+    limit page_size
+    offset offset_index;
+end $$
+DELIMITER ;
+
+DELIMITER $$
+create procedure get_found_students_total_pages(
+    keyword_in varchar(100),
+    page_size int,
+    out total_page int
+)
+begin
+    declare keyword varchar(100);
+    declare courses_count int;
+    set keyword = concat('%', keyword_in, '%');
+    set courses_count = (select count(id)
+                         from student
+                         where name like keyword
+                            or email like keyword
+                            or cast(id as char) like keyword);
+    set total_page = CEIL(courses_count / page_size);
 end $$
 DELIMITER ;
 
@@ -272,8 +442,9 @@ DELIMITER ;
 DELIMITER $$
 create procedure statistics_count_students_by_each_course()
 begin
-    select c.name as course_name, count(e.student_id)
-    as count_students
+    select c.name as course_name,
+           count(e.student_id)
+                  as count_students
     from enrollment e
              inner join course c on e.course_id = c.id
     group by e.course_id;
@@ -283,7 +454,8 @@ DELIMITER ;
 DELIMITER $$
 create procedure get_top_5_course_by_student_count()
 begin
-    select c.name as course_name, count(e.student_id)
+    select c.name as course_name,
+           count(e.student_id)
                   as count_students
     from enrollment e
              inner join course c on e.course_id = c.id
@@ -296,11 +468,12 @@ DELIMITER ;
 DELIMITER $$
 create procedure get_courses_have_more_than_10_student()
 begin
-    select c.name as course_name, count(e.student_id)
+    select c.name as course_name,
+           count(e.student_id)
                   as count_students
     from enrollment e
              inner join course c on e.course_id = c.id
     group by e.course_id
-    having count(e.student_id) >10;
+    having count(e.student_id) > 10;
 end $$
 DELIMITER ;
