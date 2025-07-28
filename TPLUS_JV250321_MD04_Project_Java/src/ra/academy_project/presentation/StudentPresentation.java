@@ -155,28 +155,22 @@ public class StudentPresentation {
     }
 
     public void addEnrollment(Scanner scanner) {
-        int courseId = inputCourseId(scanner, "Nhap ma khoa hoc can dang ky: ");
+        int courseId = Validator.inputValidInteger(scanner, "Nhap ma khoa hoc can dang ky: ");
+        Optional<Course> course = courseService.findCourseById(courseId);
+        if (course.isEmpty()) {
+            System.out.println("Khong tim thay khoa hoc co id ban vua nhap");
+            return;
+        }
+
+        if (enrollmentService.isAlreadyEnrolled(currentStudent.getId(), courseId)) {
+            System.out.println("Ban da dang ky khoa hoc nay roi!");
+            return;
+        }
+
         Enrollment enrollment = new Enrollment();
         enrollment.setStudentId(currentStudent.getId());
         enrollment.setCourseId(courseId);
         enrollmentService.addEnrollment(enrollment);
-    }
-
-    public int inputCourseId(Scanner scanner, String message) {
-        do {
-            int courseId = Validator.inputValidInteger(scanner, message);
-            Optional<Course> course = courseService.findCourseById(courseId);
-
-            if (course.isEmpty()) {
-                System.out.println("Khong tim thay khoa hoc co id ban vua nhap");
-                continue;
-            }
-
-            if (!enrollmentService.isAlreadyEnrolled(currentStudent.getId(), courseId)) {
-                return courseId;
-            }
-            System.out.println("Ban da dang ky khoa hoc nay roi!");
-        } while (true);
     }
 
     public void displayEnrollmentMenu(Scanner scanner) {

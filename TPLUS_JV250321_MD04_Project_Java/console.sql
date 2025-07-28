@@ -585,7 +585,7 @@ begin
     select count(id) into count_students from student;
 end $$
 DELIMITER ;
-
+# drop procedure get_top_5_course_by_student_count;
 DELIMITER $$
 create procedure statistics_count_students_by_each_course()
 begin
@@ -594,6 +594,7 @@ begin
                   as count_students
     from enrollment e
              inner join course c on e.course_id = c.id
+    WHERE e.status = 'CONFIRM'
     group by e.course_id;
 end $$
 DELIMITER ;
@@ -606,6 +607,7 @@ begin
                   as count_students
     from enrollment e
              inner join course c on e.course_id = c.id
+    WHERE e.status = 'CONFIRM'
     group by e.course_id
     order by count_students DESC
     limit 5;

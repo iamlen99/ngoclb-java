@@ -12,6 +12,8 @@ import java.util.Scanner;
 
 public class CoursePresentation {
     public static final int pageSize = 5;
+    private static final String RESET = "\033[0m";
+    private static final String RED = "\033[0;31m";
     public final CourseService courseService;
 
     public CoursePresentation() {
@@ -123,13 +125,13 @@ public class CoursePresentation {
                                 isExit = true;
                                 break;
                             default:
-                                System.err.println("Vui long chon tu 1-4");
+                                System.out.println(RED + "Vui long chon tu 1-4" + RESET);
                         }
                         courseService.updateCourse(course);
                     } while (!isExit);
                 },
                 () -> {
-                    System.err.println("Id ban vua nhap khong ton tai!");
+                    System.out.println(RED + "Id ban vua nhap khong ton tai!" + RESET);
                 });
     }
 
@@ -144,7 +146,7 @@ public class CoursePresentation {
                     courseService.deleteCourse(course);
                 },
                 () -> {
-                    System.err.println("Id ban vua nhap khong ton tai!");
+                    System.out.println(RED + "Id ban vua nhap khong ton tai!" + RESET);
                 });
     }
 
@@ -153,7 +155,7 @@ public class CoursePresentation {
         int currentPage = 1;
         int totalPages = courseService.getTotalPagesByFoundName(courseName, pageSize);
         if (totalPages == 0) {
-            System.out.println("Khong tim thay khoa hoc nao voi tu khoa ban vua nhap");
+            System.out.println(RED + "Khong tim thay khoa hoc nao voi tu khoa ban vua nhap" + RESET);
             return;
         }
         do {
@@ -197,7 +199,7 @@ public class CoursePresentation {
                     break;
 
                 default:
-                    System.out.println("Vui long chon tu 1-5");
+                    System.out.println(RED + "Vui long chon tu 1-5" + RESET);
             }
         } while (!isExit);
     }

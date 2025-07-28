@@ -6,18 +6,21 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class Validator {
-    public static boolean isEmpty (String data) {
+    private static final String RESET = "\033[0m";
+    private static final String RED = "\033[0;31m";
+
+    public static boolean isEmpty(String data) {
         return data == null || data.trim().isEmpty();
     }
 
-    public static String inputNotEmptyData (Scanner scanner, String message) {
+    public static String inputNotEmptyData(Scanner scanner, String message) {
         System.out.print(message);
         do {
             String input = scanner.nextLine();
             if (!isEmpty(input)) {
                 return input;
             }
-            System.err.print("Ban chua nhap gi ca, hay " + message.toLowerCase());
+            System.out.print(RED + "Ban chua nhap gi ca, hay " + message.toLowerCase() + RESET);
         } while (true);
     }
 
@@ -37,7 +40,7 @@ public class Validator {
             if (isInteger(input)) {
                 return Integer.parseInt(input);
             }
-            System.err.print("Vui long nhap vao mot so nguyen: ");
+            System.out.print(RED + "Vui long nhap vao mot so nguyen: " + RESET);
         } while (true);
     }
 
@@ -47,7 +50,7 @@ public class Validator {
             if (input > 0) {
                 return input;
             }
-            System.err.println("Vui long nhap vao mot so nguyen duong");
+            System.out.println(RED + "Vui long nhap vao mot so nguyen duong" + RESET);
         } while (true);
     }
 
@@ -59,10 +62,10 @@ public class Validator {
                 try {
                     return LocalDate.parse(dateOfBirth, Validator.formatter);
                 } catch (Exception e) {
-                    System.out.print("Dinh dang ngay khong hop le (Dung: dd/MM/yyyy), hay nhap lai: ");
+                    System.out.print(RED + "Dinh dang ngay khong hop le (Dung: dd/MM/yyyy), hay nhap lai: " + RESET);
                 }
             } else {
-                System.out.print("Ngay sinh khong duoc de trong, vui long nhap ngay sinh (dd/MM/yyyy): ");
+                System.out.print(RED + "Ngay sinh khong duoc de trong, vui long nhap ngay sinh (dd/MM/yyyy): " + RESET);
             }
         } while (true);
     }
@@ -77,10 +80,10 @@ public class Validator {
                 } else if (gender.equalsIgnoreCase("nu")) {
                     return false;
                 } else {
-                    System.out.print("Gia tri nhap khong hop le, xin hay nhap lai gioi tinh (nam/nu): ");
+                    System.out.print(RED + "Gia tri nhap khong hop le, xin hay nhap lai gioi tinh (nam/nu): " + RESET);
                 }
             } else {
-                System.out.print("Gioi tinh khong duoc de trong, xin hay nhap gioi tinh (nam/nu): ");
+                System.out.print(RED + "Gioi tinh khong duoc de trong, xin hay nhap gioi tinh (nam/nu): " + RESET);
             }
         } while (true);
     }
@@ -95,7 +98,7 @@ public class Validator {
             if (Validator.isValidPhoneNumber(phone)) {
                 return phone;
             }
-            System.out.println("Dinh dang dien thoai khong hop le, xin hay nhap lai phone (hoac co the khong nhap): ");
+            System.out.print(RED + "Dinh dang dien thoai khong hop le, xin hay nhap lai phone (hoac co the khong nhap): " + RESET);
         } while (true);
     }
 
@@ -104,13 +107,13 @@ public class Validator {
         do {
             String password = scanner.nextLine();
             if (Validator.isEmpty(password)) {
-                System.out.print("Mat khau khong duoc de trong, xin hay nhap mat khau: ");
+                System.out.print(RED + "Mat khau khong duoc de trong, xin hay nhap mat khau: " + RESET);
             } else {
                 if (Validator.isValidPassword(password)) {
                     return password;
                 }
-                System.out.println("Mat khau phai bao gom chu hoa, chu thuong, 1 ky tu la so, 1 ky tu dac biet\n"
-                        + "toi thieu 8 ki tu va toi da 20 ky tu");
+                System.out.println(RED + "Mat khau phai bao gom chu hoa, chu thuong, 1 ky tu la so, 1 ky tu dac biet\n"
+                        + "toi thieu 8 ki tu va toi da 20 ky tu!" + RESET);
             }
         } while (true);
     }

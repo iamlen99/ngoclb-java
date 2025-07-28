@@ -47,7 +47,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public int getTotalPagesByEnrolledStudentId(int studentId, int pageSize) {
-        return enrollmentDAO.getEnrolledTotalPages(studentId, pageSize);
+        return enrollmentDAO.getTotalPages(studentId, pageSize);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public boolean isExistWaitingStatus() {
-        return enrollmentDAO.countWaittingStatus() != 0;
+        return enrollmentDAO.countWaitingStatus() != 0;
     }
 
     @Override

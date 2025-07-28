@@ -5,8 +5,8 @@ import ra.academy_project.validation.Validator;
 import java.util.Scanner;
 
 public class Pagination {
-    public static final String RESET = "\033[0m";
-    public static final String RED = "\033[0;31m";
+    private static final String RESET = "\033[0m";
+    private static final String RED = "\033[0;31m";
 
     public static int handlePagination(Scanner scanner, int currentPage, int totalPages) {
         String pre = currentPage > 1 ? "previous " : "";

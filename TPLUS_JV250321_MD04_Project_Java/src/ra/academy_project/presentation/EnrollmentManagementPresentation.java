@@ -59,7 +59,7 @@ public class EnrollmentManagementPresentation {
         final int pageSize = 5;
         int totalPages = enrollmentService.getEnrolledStudentsTotalPages(pageSize);
 
-        do{
+        do {
             List<CourseEnrolledStudent> enrolledStudentList = enrollmentService.getCourseEnrolledStudents(currentPage, pageSize);
             enrollmentService.displayEnrolledStudents(enrolledStudentList);
 
@@ -74,11 +74,6 @@ public class EnrollmentManagementPresentation {
     public void approveEnrollment(Scanner scanner) {
         if (!enrollmentService.isExistWaitingStatus()) {
             System.out.println("Toan bo danh sach da duoc duyet");
-            return;
-        }
-
-        System.out.print("Ban co chac chan muon duyet hay khong hay chi xem thoi?, neu co nhap 'yes', neu khong bam phim bat ky de thoat: ");
-        if (!scanner.nextLine().equalsIgnoreCase("yes")) {
             return;
         }
 

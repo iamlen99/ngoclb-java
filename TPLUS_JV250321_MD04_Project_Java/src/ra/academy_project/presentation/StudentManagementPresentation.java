@@ -7,8 +7,6 @@ import ra.academy_project.pagination.Pagination;
 import ra.academy_project.validation.Validator;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -23,7 +21,7 @@ public class StudentManagementPresentation {
     public void studentManagementMenu(Scanner scanner) {
         boolean isExit = false;
         do {
-            System.out.println("+======================== MENU QUAN LY HOC VIEN =========================+");
+            System.out.println("+========================= MENU QUAN LY HOC VIEN ==========================+");
             System.out.println("| 1. Hien thi danh sach hoc vien                                           |");
             System.out.println("| 2. Them moi hoc vien                                                     |");
             System.out.println("| 3. Chinh sua thong tin hoc vien                                          |");

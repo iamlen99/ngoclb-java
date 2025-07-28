@@ -37,7 +37,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
 
 
     @Override
-    public int getEnrolledTotalPages(int studentId, int pageSize) {
+    public int getTotalPages(int studentId, int pageSize) {
         Connection conn = null;
         CallableStatement callStmt = null;
         int totalPage = 0;
@@ -238,7 +238,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
     }
 
     @Override
-    public int countWaittingStatus() {
+    public int countWaitingStatus() {
         Connection conn = null;
         PreparedStatement preStmt = null;
         String approveSql = "select count(id) as count_status from enrollment where status = ?";

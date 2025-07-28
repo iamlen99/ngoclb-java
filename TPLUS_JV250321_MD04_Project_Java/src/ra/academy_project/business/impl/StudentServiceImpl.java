@@ -88,7 +88,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public int getSearchedTotalPages(String searchValue, int pageSize) {
-        return studentDAO.getSearchedTotalPages(searchValue, pageSize);
+        return studentDAO.getTotalPages(searchValue, pageSize);
     }
 
     @Override

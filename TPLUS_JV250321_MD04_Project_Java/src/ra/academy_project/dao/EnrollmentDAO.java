@@ -12,7 +12,7 @@ public interface EnrollmentDAO {
 
     List<Enrollment> findByStudentId (int studentId, int currentPage, int pageSize, String sortOrder);
 
-    int getEnrolledTotalPages (int studentId, int pageSize);
+    int getTotalPages (int studentId, int pageSize);
 
     boolean cancel(int enrollmentId);
 
@@ -26,7 +26,7 @@ public interface EnrollmentDAO {
 
     boolean delete(int enrollmentId);
 
-    int countWaittingStatus();
+    int countWaitingStatus();
 
     int countAlreadyEnrollment(int studentId, int courseId);
 }

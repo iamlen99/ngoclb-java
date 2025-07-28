@@ -258,7 +258,7 @@ public class StudentDAOImpl implements StudentDAO {
     }
 
     @Override
-    public int getSearchedTotalPages(String searchValue, int pageSize) {
+    public int getTotalPages(String searchValue, int pageSize) {
         Connection conn = null;
         CallableStatement callStmt = null;
         int totalPage = 0;
